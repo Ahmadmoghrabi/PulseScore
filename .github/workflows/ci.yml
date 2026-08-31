@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    # macos-latest rather than a pinned version (e.g. macos-15): GitHub
+    # periodically retires older hosted-runner images, so pinning would
+    # eventually break CI on a repo nobody's actively maintaining. The
+    # tradeoff is the exact Xcode/simulator set can shift over time — the
+    # dynamic simulator lookup below exists specifically to absorb that.
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: Find an available iPhone simulator
+        id: simulator
+        run: |
+          DEVICE=$(xcrun simctl list devices available \
+            | grep -m1 "iPhone" \
+            | sed -E 's/^[[:space:]]*([^(]+) \(.*/\1/' \
+            | sed -E 's/[[:space:]]+$//')
+          echo "Using simulator: $DEVICE"
+          echo "device=$DEVICE" >> "$GITHUB_OUTPUT"
+
+      - name: Build
+        run: |
+          xcodebuild -project Rebase.xcodeproj -scheme Rebase \
+            -destination 'generic/platform=iOS Simulator' \
+            -configuration Debug build
+
+      - name: Test
+        run: |
+          xcodebuild -project Rebase.xcodeproj -scheme Rebase \
+            -destination "platform=iOS Simulator,name=${{ steps.simulator.outputs.device }}" \
+            -configuration Debug test

@@ -1,5 +1,7 @@
 # Rebase
 
+[![CI](https://github.com/Ahmadmoghrabi/Rebase/actions/workflows/ci.yml/badge.svg)](https://github.com/Ahmadmoghrabi/Rebase/actions/workflows/ci.yml)
+
 A SwiftUI iOS app that turns your Apple Health activity into a single, explainable daily **Workout Score** and **Recovery Score** — scored against *your own* rolling baseline, not a fixed target.
 
 <img src="docs/screenshot.png" alt="Rebase dashboard" width="320">
