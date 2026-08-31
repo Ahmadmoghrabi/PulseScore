@@ -1,4 +1,4 @@
-# PulseScore — status and next steps
+# Rebase — status and next steps
 
 ## Done
 
@@ -6,7 +6,7 @@
 - **Step 2** — `ScoreEngine`, pure Swift, 13 passing XCTest cases.
 - **UI redesign** — two-ring "Workout + Recovery" summary card, square metric tiles in a 3-column grid, line-and-dot Swift Charts trend, custom heartbeat/ring vector app icon.
 - **Step 3** — `HealthKitManager` wired end-to-end. Real `HKStatisticsCollectionQueryDescriptor` queries, native async/await (no continuation bridging needed), graceful `LoadState` handling (loading / authorization-denied / not-enough-data / loaded / failed). Verified for real on the Simulator via a DEBUG-only "Seed Data" button that writes synthetic samples into the Simulator's HealthKit store (Release builds never request write access — this is entirely compiled out via `#if DEBUG`).
-- **Portfolio-ready**: pushed to GitHub at `Ahmadmoghrabi/PulseScore` with a README covering the scoring formula, architecture, and real debugging lessons.
+- **Portfolio-ready**: pushed to GitHub at `Ahmadmoghrabi/Rebase` with a README covering the scoring formula, architecture, and real debugging lessons.
 - **Pull-to-refresh** — `.refreshable` on the dashboard's `ScrollView` calls `load()` again, so updated numbers (e.g. right after a workout) don't require force-quitting and relaunching.
 
 Three real bugs were found and fixed during Step 3 by actually running the app, not by code review — worth remembering the *kind* of thing to watch for next time:

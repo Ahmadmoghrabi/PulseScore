@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Centralized color constants for PulseScore's dark, WHOOP/Bevel-inspired look.
+/// Centralized color constants for Rebase's dark, WHOOP/Bevel-inspired look.
 /// `enum Theme` with no cases and only `static` members is a common Swift pattern for
 /// a namespace — we're never going to make an *instance* of Theme, we just want
 /// `Theme.background` etc. callable without importing a singleton object. (An enum

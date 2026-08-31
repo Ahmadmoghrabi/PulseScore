@@ -2,7 +2,7 @@ import SwiftUI
 
 /// Groups the two score rings (Workout, Recovery) with a plain-language coaching line
 /// underneath, in one card — the "rings + one-line takeaway" pattern common to
-/// WHOOP/Bevel-style dashboards, built here from PulseScore's own data, formula, and
+/// WHOOP/Bevel-style dashboards, built here from Rebase's own data, formula, and
 /// copy rather than reusing anyone else's design directly.
 struct TodaySummaryCard: View {
     let workoutScore: Int

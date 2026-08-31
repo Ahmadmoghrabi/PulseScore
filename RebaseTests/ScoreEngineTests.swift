@@ -1,7 +1,7 @@
 import XCTest
-@testable import PulseScore
+@testable import Rebase
 
-/// `@testable import` gives this test target visibility into PulseScore's internal
+/// `@testable import` gives this test target visibility into Rebase's internal
 /// (non-`public`) types — normally an app target's types aren't visible outside it,
 /// but Xcode relaxes that specifically for the paired test target.
 final class ScoreEngineTests: XCTestCase {

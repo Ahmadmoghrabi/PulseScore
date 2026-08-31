@@ -7,7 +7,7 @@ import SwiftUI
 /// `.rotationEffect(-90°)` spins the whole thing so progress starts at 12 o'clock
 /// (SwiftUI circles start their trim at 3 o'clock by default) and sweeps clockwise.
 ///
-/// `diameter` and `lineWidth` are parameters, not hardcoded, because PulseScore shows
+/// `diameter` and `lineWidth` are parameters, not hardcoded, because Rebase shows
 /// two of these side by side (Workout, Recovery) at a shared size — a single fixed
 /// size would only work for one usage.
 ///

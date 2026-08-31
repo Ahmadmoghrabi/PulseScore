@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// PulseScore's main (and, for now, only) screen. Reads real data from
+/// Rebase's main (and, for now, only) screen. Reads real data from
 /// `HealthKitManager` and switches on its `state` to show a loading spinner, a
 /// permission-denied message, a not-enough-data message, or the real dashboard —
 /// the graceful states the original spec called for.
@@ -15,7 +15,7 @@ struct ContentView: View {
         NavigationStack {
             content
                 .background(Theme.background.ignoresSafeArea())
-                .navigationTitle("PulseScore")
+                .navigationTitle("Rebase")
                 .toolbarBackground(Theme.background, for: .navigationBar)
                 .toolbarColorScheme(.dark, for: .navigationBar)
                 #if DEBUG
@@ -59,13 +59,13 @@ struct ContentView: View {
             statusView(
                 systemImage: "heart.slash",
                 title: "Health Access Needed",
-                message: "PulseScore needs permission to read your activity data. Enable it in Settings \u{2192} Privacy \u{2192} Health \u{2192} PulseScore."
+                message: "Rebase needs permission to read your activity data. Enable it in Settings \u{2192} Privacy \u{2192} Health \u{2192} Rebase."
             )
         case .notEnoughData:
             statusView(
                 systemImage: "chart.line.uptrend.xyaxis",
                 title: "Not Enough Data Yet",
-                message: "PulseScore needs at least a week of activity history to compute your baseline. Check back after a few more days of tracked activity."
+                message: "Rebase needs at least a week of activity history to compute your baseline. Check back after a few more days of tracked activity."
             )
         case .failed(let message):
             statusView(

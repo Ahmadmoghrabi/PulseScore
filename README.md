@@ -1,14 +1,14 @@
-# PulseScore
+# Rebase
 
 A SwiftUI iOS app that turns your Apple Health activity into a single, explainable daily **Workout Score** and **Recovery Score** — scored against *your own* rolling baseline, not a fixed target.
 
-<img src="docs/screenshot.png" alt="PulseScore dashboard" width="320">
+<img src="docs/screenshot.png" alt="Rebase dashboard" width="320">
 
 *(Debug build, with the Simulator's HealthKit store seeded with sample data via the in-app "Seed Data" button — see [Running it](#running-it).)*
 
 ## Concept
 
-Most fitness apps either bury you in raw numbers or hide the math behind a black-box "readiness" score. PulseScore does neither: every score comes from a formula simple enough to state in one sentence, and the dashboard shows its work — exactly what today's numbers were compared to your baseline, not just a mystery percentage.
+Most fitness apps either bury you in raw numbers or hide the math behind a black-box "readiness" score. Rebase does neither: every score comes from a formula simple enough to state in one sentence, and the dashboard shows its work — exactly what today's numbers were compared to your baseline, not just a mystery percentage.
 
 Visually inspired by WHOOP/Bevel-style dashboards (circular score rings, dark theme, card-based breakdown), but built from scratch with an intentionally simpler, fully transparent formula.
 
@@ -37,7 +37,7 @@ Each metric is **capped at 100% of baseline** — matching or beating your own n
 - **SwiftUI views** — consume only `ScoreResult` / `DailyMetrics`, never HealthKit types directly. This is what let the entire UI get built and refined against mock data *before* HealthKit was wired in at all — swapping the data source at the end required zero view changes.
 
 ```
-PulseScore/
+Rebase/
 ├── ScoreEngine/   Pure scoring logic + weights (unit tested)
 ├── HealthKit/     HealthKitManager — the only HealthKit-aware code
 ├── Models/        DailyMetrics, ScoreResult, ScoreHistoryPoint
@@ -54,10 +54,10 @@ Requires Xcode 15+, iOS 17+ deployment target.
 
 ```bash
 brew install xcodegen   # if you don't already have it
-git clone https://github.com/Ahmadmoghrabi/PulseScore.git
-cd PulseScore
+git clone https://github.com/Ahmadmoghrabi/Rebase.git
+cd Rebase
 xcodegen generate
-open PulseScore.xcodeproj
+open Rebase.xcodeproj
 ```
 
 Build and run on a Simulator or device (`Cmd+R`). Real Apple Health data only appears on a **physical device** signed with your own Apple ID — the Simulator's HealthKit store is empty and fully sandboxed from any real device's history. To exercise the real HealthKit query path without real activity, a **Debug-only** "Seed Data" button (compiled out of Release builds entirely, along with the write access it requests) writes 14 days of synthetic samples into the Simulator's Health store.
@@ -65,7 +65,7 @@ Build and run on a Simulator or device (`Cmd+R`). Real Apple Health data only ap
 Run the test suite with `Cmd+U`, or headlessly:
 
 ```bash
-xcodebuild -project PulseScore.xcodeproj -scheme PulseScore \
+xcodebuild -project Rebase.xcodeproj -scheme Rebase \
   -destination 'platform=iOS Simulator,name=iPhone Air' test
 ```
 

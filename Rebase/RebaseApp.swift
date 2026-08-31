@@ -8,7 +8,7 @@ import SwiftUI
 // the app's scenes. SwiftUI reads that description and builds/manages the actual
 // UIKit windows for us — we never touch a window or view controller directly.
 @main
-struct PulseScoreApp: App {
+struct RebaseApp: App {
     var body: some Scene {
         // A `WindowGroup` is a scene that manages one window containing our root view.
         // On iPhone there's only ever one window, but the same code scales to iPad/Mac.
