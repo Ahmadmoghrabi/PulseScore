@@ -38,5 +38,5 @@ Everything built so far reads *historical, already-saved* HealthKit samples afte
 - A longer trend view (30 days) alongside the current 7-day one.
 
 ### 6. Visual design tweaks
-- Revisit the app icon — explore alternatives beyond the current heartbeat/ring design.
+- ~~Revisit the app icon~~ — done: redesigned as two interlocking rings (green/yellow, matching the Workout/Recovery colors) instead of the original single heartbeat-through-a-ring design.
 - Change the main dashboard's background — currently a flat near-black (`Theme.background`); consider a gradient or otherwise more distinct "landing" treatment for the top of the screen behind the title/summary card.
