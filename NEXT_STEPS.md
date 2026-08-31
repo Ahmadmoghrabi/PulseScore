@@ -38,5 +38,8 @@ Everything built so far reads *historical, already-saved* HealthKit samples afte
 - A longer trend view (30 days) alongside the current 7-day one.
 
 ### 6. Visual design tweaks
-- ~~Revisit the app icon~~ — done: redesigned as two interlocking rings (green/yellow, matching the Workout/Recovery colors) instead of the original single heartbeat-through-a-ring design.
+- ~~Revisit the app icon~~ — done, after a few rounds: colored two-ring mark → monochrome EKG-bridge mark → finally replaced with the user's own IconKitchen export (solid white heart with a black EKG notch on black). That's the current icon.
 - Change the main dashboard's background — currently a flat near-black (`Theme.background`); consider a gradient or otherwise more distinct "landing" treatment for the top of the screen behind the title/summary card.
+
+### 7. Project rename follow-through
+The project was renamed PulseScore → Rebase (folders, bundle ID, GitHub repo, resume, README) — all verified working. Nothing left to do here, just noting it happened in case older conversation history or search results still reference the old name.
