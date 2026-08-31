@@ -7,7 +7,8 @@
 - **UI redesign** — two-ring "Workout + Recovery" summary card, square metric tiles in a 3-column grid, line-and-dot Swift Charts trend, custom heartbeat/ring vector app icon.
 - **Step 3** — `HealthKitManager` wired end-to-end. Real `HKStatisticsCollectionQueryDescriptor` queries, native async/await (no continuation bridging needed), graceful `LoadState` handling (loading / authorization-denied / not-enough-data / loaded / failed). Verified for real on the Simulator via a DEBUG-only "Seed Data" button that writes synthetic samples into the Simulator's HealthKit store (Release builds never request write access — this is entirely compiled out via `#if DEBUG`).
 - **Portfolio-ready**: pushed to GitHub at `Ahmadmoghrabi/Rebase` with a README covering the scoring formula, architecture, and real debugging lessons.
-- **Pull-to-refresh** — `.refreshable` on the dashboard's `ScrollView` calls `load()` again, so updated numbers (e.g. right after a workout) don't require force-quitting and relaunching.
+- **Pull-to-refresh** — `.refreshable` on the dashboard's `ScrollView` calls `load()` again, so updated numbers (e.g. right after a workout) don't require force-quitting and relaunching. Also fixed a stuck-spinner bug: the closure could resolve fast enough that the system's refresh-control bridging lost track of "ended refreshing" — fixed by racing `load()` against a 400ms floor delay.
+- **CI** — GitHub Actions builds and runs the full test suite on every push/PR (`.github/workflows/ci.yml`), mirroring the ecg-platform project. Dynamically picks whatever iPhone simulator is available on the runner rather than hardcoding a device name. Verified passing on GitHub's actual infrastructure, not just locally.
 
 Three real bugs were found and fixed during Step 3 by actually running the app, not by code review — worth remembering the *kind* of thing to watch for next time:
 1. Third-party apps can't write `HKQuantityTypeIdentifier.appleExerciseTime` (or Stand Time) — Apple reserves those for its own frameworks.
@@ -28,6 +29,9 @@ You floated this idea mid-session — glanceable Workout Score right after finis
 Everything built so far reads *historical, already-saved* HealthKit samples after the fact. The Fitness+/Watch Software domain is about *live* workout sessions — `HKWorkoutSession` and the `WorkoutKit` framework, streaming heart rate/energy in real time on-wrist, saving the completed session back to HealthKit when done. Even a minimal watchOS target that starts a workout session and shows live heart rate would be a meaningfully different (and more directly relevant) skill demonstration than anything in the iPhone app so far. Worth treating as its own multi-session project rather than a quick add-on.
 
 ### 4. Engineering hygiene
+- ~~CI~~ — done (see above).
+- Privacy manifest (`PrivacyInfo.xcprivacy`) — Apple now requires apps to declare "required reason" API usage for App Store submission. Not yet added; relevant if this ever actually ships.
+- SwiftLint — consistent style enforcement, standard on real iOS teams. Not yet added.
 - Unit tests for `HealthKitManager`'s pure logic (e.g. `computeTrend`) — the HealthKit-calling parts can't be unit tested without a device/simulator, but the date-bucketing and trend-assembly logic could be extracted and tested the same way `ScoreEngine` is.
 - XCUITest coverage for the loading/denied/empty/loaded states in `ContentView`.
 - HealthKit background delivery (`HKObserverQuery`) so the score updates automatically instead of only at launch.
