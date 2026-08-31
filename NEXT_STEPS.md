@@ -38,3 +38,7 @@ Everything built so far reads *historical, already-saved* HealthKit samples afte
 - A detail view per metric (tap a tile → see the actual 7-day values that produced today's percentage, not just the summary sentence).
 - Let the user adjust the metric weights themselves and see the score recompute — turns the "explainable formula" pitch into something interactive.
 - A longer trend view (30 days) alongside the current 7-day one.
+
+### 7. Visual design tweaks
+- Revisit the app icon — explore alternatives beyond the current heartbeat/ring design.
+- Change the main dashboard's background — currently a flat near-black (`Theme.background`); consider a gradient or otherwise more distinct "landing" treatment for the top of the screen behind the title/summary card.
