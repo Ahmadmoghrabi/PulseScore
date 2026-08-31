@@ -1,77 +1,40 @@
-# PulseScore — Step 3 plan: wire in real HealthKit data
+# PulseScore — status and next steps
 
-Status when this was written: Steps 1 and 2 are done. `ScoreEngine` is fully built and
-unit-tested (13 passing tests). The UI (two-ring summary card, square metric tiles,
-line-and-dot trend chart, custom app icon) is complete and running against
-`MockData`. Nothing in HealthKit has been touched yet — this file is the plan for that,
-written so a fresh session (or a fresh set of eyes) can pick it up without re-deriving
-any of the above.
+## Done
 
-## What's already in place (no action needed)
+- **Step 1** — project scaffold (XcodeGen-based), full UI shell against mock data.
+- **Step 2** — `ScoreEngine`, pure Swift, 13 passing XCTest cases.
+- **UI redesign** — two-ring "Workout + Recovery" summary card, square metric tiles in a 3-column grid, line-and-dot Swift Charts trend, custom heartbeat/ring vector app icon.
+- **Step 3** — `HealthKitManager` wired end-to-end. Real `HKStatisticsCollectionQueryDescriptor` queries, native async/await (no continuation bridging needed), graceful `LoadState` handling (loading / authorization-denied / not-enough-data / loaded / failed). Verified for real on the Simulator via a DEBUG-only "Seed Data" button that writes synthetic samples into the Simulator's HealthKit store (Release builds never request write access — this is entirely compiled out via `#if DEBUG`).
+- **Portfolio-ready**: pushed to GitHub at `Ahmadmoghrabi/PulseScore` with a README covering the scoring formula, architecture, and real debugging lessons.
 
-- The `PulseScore.entitlements` file already declares `com.apple.developer.healthkit: true`
-  (set in `project.yml` back in Step 1).
-- `INFOPLIST_KEY_NSHealthShareUsageDescription` is already set in `project.yml` — the
-  permission prompt text is ready.
-- `DailyMetrics`, `ScoreResult`, `MetricScoreBreakdown` are the exact shape
-  `HealthKitManager` needs to produce — `ScoreEngine` and every view already consume
-  these types and don't know or care where they came from. That's the payoff of the
-  architecture: this step should only touch two things (a new `HealthKitManager` file,
-  and `ContentView`), nothing else.
+Three real bugs were found and fixed during Step 3 by actually running the app, not by code review — worth remembering the *kind* of thing to watch for next time:
+1. Third-party apps can't write `HKQuantityTypeIdentifier.appleExerciseTime` (or Stand Time) — Apple reserves those for its own frameworks.
+2. Write access needs `NSHealthUpdateUsageDescription`, a separate Info.plist key from the read-only `NSHealthShareUsageDescription`.
+3. The original "not enough data" check compared day *counts*, but `fetchFourteenDayHistory()` always returns exactly 14 synthesized days regardless of real data — the actual check needs to look for real recorded activity, not calendar coverage.
 
-## Steps
+## Not yet done — pick from here
 
-1. **Create `PulseScore/HealthKit/HealthKitManager.swift`.**
-   - `import HealthKit`.
-   - An `@Observable` class (iOS 17+ macro) holding an `HKHealthStore` instance, plus
-     published-ish state SwiftUI can react to: something like
-     `enum LoadState { case loading, authorizationDenied, noData, loaded, failed(Error) }`
-     and `var state: LoadState`, `var todayResult: ScoreResult?`,
-     `var recoveryResult: ScoreResult?`, `var trend: [ScoreHistoryPoint]`.
-   - Guard `HKHealthStore.isHealthDataAvailable()` before doing anything else.
+Roughly in priority order, but none of these block each other — pick whichever's most useful for wherever you're taking this next (interview prep vs. actually shipping it).
 
-2. **Define the four read types** as `HKQuantityType`s:
-   `.activeEnergyBurned`, `.appleExerciseTime`, `.stepCount`, `.restingHeartRate`.
-   Request authorization with `healthStore.requestAuthorization(toShare: [], read: readTypes)`
-   — read-only, matches the spec.
+### 1. Verify on a real device, with real data
+Everything so far has only been verified on the Simulator with synthetic seeded data. Real verification needs: Xcode → Signing & Capabilities → Team set to your Apple ID, a physical iPhone as the run destination, trusting the dev certificate on-device (Settings → General → VPN & Device Management), then granting the real Health permission sheet. Worth specifically checking what happens if your real 7-day history is thin — that's exactly the `.notEnoughData` path, and it'd be good to confirm it degrades as gracefully with real data as it did with the empty Simulator store.
 
-3. **Fetch 14 days of data with `HKStatisticsCollectionQuery`**, one query per metric,
-   bucketed by day (`.cumulativeSum` for energy/exercise/steps, `.discreteAverage` for
-   resting heart rate) — NOT 14 separate single-day queries. One query per metric
-   covering the whole window is the idiomatic HealthKit pattern and far fewer round
-   trips. HealthKit's query APIs are completion-handler based, not native async yet —
-   bridge each with `withCheckedThrowingContinuation` to use them with `async/await`
-   the same way the rest of the app already does.
+### 2. Pull-to-refresh / manual reload
+Right now `HealthKitManager.load()` only runs once, in `ContentView`'s `.task` on first appear — there's no way to refresh without relaunching the app. A `.refreshable` modifier on the dashboard's `ScrollView` calling `load()` again would be a small, clean addition.
 
-4. **Assemble `[DailyMetrics]`** from the four per-metric daily buckets (same struct
-   `MockData` already builds), then call the *existing, untouched* `ScoreEngine.score`
-   and `ScoreEngine.recoveryScore` — no changes needed there.
+### 3. Home Screen widget (WidgetKit)
+You floated this idea mid-session — glanceable Workout Score right after finishing a workout, without opening the app. This is a genuinely good next feature: a `WidgetKit` extension target, sharing `ScoreEngine` and the HealthKit-fetching logic via an App Group, showing the current Workout/Recovery scores. Also a natural bridge toward the "watch software" angle below, since widgets and watchOS complications are close cousins conceptually.
 
-5. **Update `ContentView`**: replace the `MockData` properties with
-   `@State private var healthKitManager = HealthKitManager()`, add
-   `.task { await healthKitManager.load() }`, and `switch healthKitManager.state` to
-   show: a loading spinner, an authorization-denied state (with a button/link to open
-   Settings), a "not enough data yet" empty state (this is the same `nil`-returning
-   contract `ScoreEngine` already has — reuse it, don't invent a new one), or the real
-   dashboard. `ScoreRingView`, `MetricCardView`, `TrendChartView`, `TodaySummaryCard`
-   need zero changes — they only ever consumed `ScoreResult`/`DailyMetrics`, never
-   HealthKit types directly.
+### 4. A watchOS companion (stretch, but the most direct alignment with a Fitness+/Watch Software role)
+Everything built so far reads *historical, already-saved* HealthKit samples after the fact. The Fitness+/Watch Software domain is about *live* workout sessions — `HKWorkoutSession` and the `WorkoutKit` framework, streaming heart rate/energy in real time on-wrist, saving the completed session back to HealthKit when done. Even a minimal watchOS target that starts a workout session and shows live heart rate would be a meaningfully different (and more directly relevant) skill demonstration than anything in the iPhone app so far. Worth treating as its own multi-session project rather than a quick add-on.
 
-6. **Testing on Simulator**: the Simulator's Health app can have sample data entered
-   by hand (Health app → Browse → search each metric → Add Data). Note that a *fresh*
-   Simulator very likely has zero resting-heart-rate data — expect to see the
-   "not enough data" state immediately for Recovery, which is a good opportunity to
-   confirm that state actually renders correctly, not a bug to chase.
+### 5. Engineering hygiene
+- Unit tests for `HealthKitManager`'s pure logic (e.g. `computeTrend`) — the HealthKit-calling parts can't be unit tested without a device/simulator, but the date-bucketing and trend-assembly logic could be extracted and tested the same way `ScoreEngine` is.
+- XCUITest coverage for the loading/denied/empty/loaded states in `ContentView`.
+- HealthKit background delivery (`HKObserverQuery`) so the score updates automatically instead of only at launch.
 
-7. **Testing on a real device**: requires Signing & Capabilities → Team set to your
-   Apple ID, running on a physical iPhone, and the device having a real activity
-   history. If the phone is a light Apple Watch/iPhone-activity user, the 7-day
-   baseline may be sparse — this is exactly the scenario the `nil`-returning
-   "not enough data" contract in `ScoreEngine` was built to handle gracefully.
-
-## After this step
-
-Per the original plan, Step 4 is "connect real data to the score and polish the UI" —
-by the time Step 3 is done, that's largely already true (the UI was built against the
-same data shapes from day one), so Step 4 becomes more about edge-case polish and any
-visual refinement, not a rewire.
+### 6. UI/feature extras (lower priority, "nice to have")
+- A detail view per metric (tap a tile → see the actual 7-day values that produced today's percentage, not just the summary sentence).
+- Let the user adjust the metric weights themselves and see the score recompute — turns the "explainable formula" pitch into something interactive.
+- A longer trend view (30 days) alongside the current 7-day one.
