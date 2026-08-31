@@ -101,6 +101,13 @@ struct ContentView: View {
             }
             .padding()
         }
+        // Pull-to-refresh: SwiftUI attaches the gesture and spinner to the ScrollView
+        // automatically. `load()` only ever runs once otherwise (from `.task` on first
+        // appear), so without this there'd be no way to see today's updated numbers —
+        // say, right after finishing a workout — without force-quitting and relaunching.
+        .refreshable {
+            await healthKitManager.load()
+        }
     }
 
     private func statusView(systemImage: String?, title: String, message: String?) -> some View {
