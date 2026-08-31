@@ -105,8 +105,17 @@ struct ContentView: View {
         // automatically. `load()` only ever runs once otherwise (from `.task` on first
         // appear), so without this there'd be no way to see today's updated numbers —
         // say, right after finishing a workout — without force-quitting and relaunching.
+        //
+        // `load()` alone can resolve fast enough (a cheap HealthKit round trip) that the
+        // system's refresh-control bridging loses track of the "ended refreshing" signal
+        // and the spinner sticks forever, even though the data genuinely reloaded — a
+        // known SwiftUI `.refreshable` quirk. Racing it against a floor delay guarantees
+        // the closure never returns before the animation has had time to register, without
+        // ever cutting a slow real load short (we still await `load()` itself either way).
         .refreshable {
-            await healthKitManager.load()
+            async let reload: Void = healthKitManager.load()
+            try? await Task.sleep(for: .milliseconds(400))
+            await reload
         }
     }
 
